@@ -12,3 +12,7 @@ class Config:
 
     # Application settings
     DEBUG = os.getenv('RETRO_AGENT_DEBUG', 'true').lower() == 'true'  # Default to debug mode
+
+    # Storage settings
+    CACHE_DIR = os.getenv('RETRO_AGENT_CACHE_DIR', './images')
+    MAX_CACHE_SIZE = int(os.getenv('RETRO_AGENT_MAX_CACHE_SIZE', str(10 * 1024 * 1024 * 1024)))  # 10GB default

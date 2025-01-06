@@ -1,8 +1,13 @@
 ### Get emulator status
 GET http://localhost:5000/status
 
-### Toggle emulator state
-POST http://localhost:5000/dev/toggle
+### endpoint for emulator state changes
+POST http://localhost:5000/dev/mode
+Content-Type: application/json
+
+{
+    "mode": "REAL"
+}
 
 ### endpoint for emulator state changes
 POST http://localhost:5000/dev/mode
@@ -17,6 +22,24 @@ POST http://localhost:5000/dev/state
 Content-Type: application/json
 
 {
-    "running": "true",
-    "demo": "12"
+    "running": true,
+    "demo": "asdf"
+}
+
+### endpoint for emulator state changes
+POST http://localhost:5000/dev/state
+Content-Type: application/json
+
+{
+    "running": false,
+    "demo": "asdf"
+}
+
+### endpoint for emulator error simulation
+POST http://localhost:5000/dev/error
+Content-Type: application/json
+
+{
+    "code": "EMULATOR_CRASHED",
+    "message": "Pooooop!"
 }
