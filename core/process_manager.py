@@ -4,7 +4,7 @@ import signal
 import psutil
 import subprocess
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class ProcessManager:
     """Handles cross-platform process management"""
 
     @staticmethod
-    def create_process(command: list) -> tuple[subprocess.Popen, psutil.Process]:
+    def create_process(command: list) -> Tuple[subprocess.Popen, psutil.Process]:
         """
         Create a new process with appropriate platform-specific settings
         Returns tuple of (subprocess.Popen, psutil.Process)
