@@ -142,7 +142,7 @@ class EmulatorManager:
         if not os.path.exists(binary_path):
             raise EmulatorError(
                 "BINARY_NOT_FOUND",
-                f"Emulator binary not found: {config['binary']} at {emulator.binary_mapper.get_path(config["binary"])}"
+                f"Emulator binary not found: {config['binary']} at {binary_path}"
             )
 
         # Validate disk images
