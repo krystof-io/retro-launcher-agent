@@ -17,8 +17,8 @@ class Config:
     CACHE_DIR = os.getenv('RETRO_AGENT_CACHE_DIR', './image-cache')
     MAX_CACHE_SIZE = int(os.getenv('RETRO_AGENT_MAX_CACHE_SIZE', str(10 * 1024 * 1024 * 1024)))  # 10GB default
 
-    BINARY_MAP_X64SC = os.getenv('BINARY_MAP_X64SC', '/home/pi/vice-install/bin/x64sc')
-    BINARY_MAP_X64 = os.getenv('BINARY_MAP_X64', '/home/pi/vice-install/bin/x64')
+    BINARY_MAP_X64SC = os.getenv('BINARY_MAP_X64SC', '/home/pi/viceinstall/bin/x64sc')
+    BINARY_MAP_X64 = os.getenv('BINARY_MAP_X64', '/home/pi/viceinstall/bin/x64')
     BINARY_MAP_AMIBERRY = os.getenv('BINARY_MAP_AMIBERRY', '/home/pi/amiberry/amiberry')
 
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
