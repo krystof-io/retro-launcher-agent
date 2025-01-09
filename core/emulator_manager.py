@@ -14,6 +14,9 @@ from .states import EmulatorState, MonitorMode
 from .errors import EmulatorError
 from .system_monitor import SystemMonitor
 from config import Config
+from .binary_mapping import BinaryMapper
+from .disk_image_cache import DiskImageCache
+from .process_manager import ProcessManager
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +32,61 @@ class EmulatorManager:
         self._connections: Set = set()
         self._lock = threading.RLock()
         self._current_config: Optional[Dict] = None
+        self._monitor_thread = None
+        self._should_monitor = False
+        self.binary_mapper = BinaryMapper(Config)
+        self.disk_cache = DiskImageCache(Config)
 
         # Ensure cache directory exists
         Path(Config.CACHE_DIR).mkdir(parents=True, exist_ok=True)
         logger.debug("EmulatorManager initialized")
+
+    def _start_process_monitor(self):
+        """Start the process monitoring thread"""
+        self._should_monitor = True
+        self._monitor_thread = threading.Thread(
+            target=self._monitor_process,
+            name="ProcessMonitor",
+            daemon=True
+        )
+        self._monitor_thread.start()
+
+    def _stop_process_monitor(self):
+        """Stop the process monitoring thread"""
+        self._should_monitor = False
+        if self._monitor_thread:
+            self._monitor_thread.join(timeout=2)
+            self._monitor_thread = None
+
+    def _monitor_process(self):
+        """Monitor the emulator process and handle unexpected termination"""
+        while self._should_monitor:
+            try:
+                if self._process and not self._process.is_running():
+                    logger.error("Emulator process terminated unexpectedly")
+                    with self._lock:
+                        self._state = EmulatorState.ERROR
+                        self._notify_error(EmulatorError(
+                            "EMULATOR_CRASH",
+                            "Emulator process terminated unexpectedly",
+                            details={
+                                "pid": self._process.pid if self._process else None,
+                                "state": self._state.name
+                            }
+                        ))
+                        self._cleanup(true)
+                    break
+            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                logger.error(f"Error monitoring process: {e}")
+                with self._lock:
+                    self._state = EmulatorState.ERROR
+                    self._notify_error(EmulatorError(
+                        "MONITORING_ERROR",
+                        f"Failed to monitor emulator process: {str(e)}"
+                    ))
+                    self._cleanup(true)
+                break
+            time.sleep(1)  #
 
     def create_message(self, msg_type: str, payload: Dict[str, Any]) -> Dict:
         """Create a protocol-compliant message envelope"""
@@ -74,7 +128,7 @@ class EmulatorManager:
 
     def _validate_program_config(self, config: Dict) -> None:
         """Validate program launch configuration"""
-        required_fields = ["binary", "args", "images"]
+        required_fields = ["binary","commandLineArgs","images","platformName","programTitle","programType","authors"]
         missing_fields = [field for field in required_fields if field not in config]
         if missing_fields:
             raise EmulatorError(
@@ -83,11 +137,12 @@ class EmulatorManager:
             )
 
         # Validate binary exists
-        binary_path = os.path.join(Config.EMULATOR_BASE_PATH, config["binary"])
+
+        binary_path = os.path.join(emulator.binary_mapper.get_path(config["binary"]))
         if not os.path.exists(binary_path):
             raise EmulatorError(
                 "BINARY_NOT_FOUND",
-                f"Emulator binary not found: {config['binary']}"
+                f"Emulator binary not found: {config['binary']} at {emulator.binary_mapper.get_path(config["binary"])}"
             )
 
         # Validate disk images
@@ -104,46 +159,54 @@ class EmulatorManager:
         """Prepare disk images for launching program"""
         image_paths = []
 
+        #sort images by disk numbers
+        images = sorted(images, key=lambda x: x["diskNumber"])
         for image in images:
-            cache_path = os.path.join(Config.CACHE_DIR, image["fileHash"])
-
-            # If image doesn't exist in cache, we'd download it here
-            # For now, just check if it exists
-            if not os.path.exists(cache_path):
-                raise EmulatorError(
-                    "IMAGE_NOT_FOUND",
-                    f"Disk image not found in cache: {image['fileHash']}"
+            try:
+                cached_path = self.disk_cache.get_disk_image(
+                    storage_path=image["storagePath"],
+                    file_hash=image["fileHash"],
+                    expected_size=image["size"]
                 )
-
-            # Verify file size
-            if os.path.getsize(cache_path) != image["size"]:
+                image_paths.append(str(cached_path))
+            except Exception as e:
                 raise EmulatorError(
-                    "IMAGE_CORRUPT",
-                    f"Disk image size mismatch for: {image['fileHash']}"
+                    "IMAGE_ERROR",
+                    f"Failed to prepare disk image: {e}",
+                    details={
+                        "storage_path": image["storagePath"],
+                        "file_hash": image["fileHash"]
+                    }
                 )
-
-            image_paths.append(cache_path)
 
         return image_paths
 
     def _build_launch_command(self, config: Dict, image_paths: List[str]) -> List[str]:
         """Build the emulator launch command"""
-        binary_path = os.path.join(Config.EMULATOR_BASE_PATH, config["binary"])
+        binary_path = os.path.join(emulator.binary_mapper.get_path(config["binary"]))
         command = [binary_path]
 
+        #command.append(' ')
         # Add configured arguments
-        command.extend(config["args"])
+        args = config["commandLineArgs"].split()
+        command.extend(args)
 
-        # Add image paths
-        for path in image_paths:
-            command.extend(["-autostart", path])
+        # Add image paths - first disk is usually the boot disk
 
+        first_image_path = str(Path(image_paths[0]).resolve())
+        logger.debug(f"First image pathx: {first_image_path}")
+        command.append(first_image_path)
+
+        logger.debug(f"Command: {command}")
         return command
 
     def launch_program(self, config: Dict) -> Dict:
         """Launch a program with the specified configuration"""
         with self._lock:
             try:
+                logger.info("Launch config received:\n%s",
+                            json.dumps(config, indent=2, sort_keys=True))
+
                 if self._state not in (EmulatorState.IDLE, EmulatorState.ERROR):
                     raise EmulatorError(
                         "INVALID_STATE",
@@ -167,18 +230,15 @@ class EmulatorManager:
 
                 # Launch the emulator
                 logger.info(f"Launching emulator with command: {' '.join(command)}")
-                process = subprocess.Popen(
-                    command,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    start_new_session=True  # Create new process group
-                )
+
+                process, psutil_process = ProcessManager.create_process(command)
 
                 # Store process handle
-                self._process = psutil.Process(process.pid)
+                self._process = psutil_process
                 self._start_time = time.time()
                 self._state = EmulatorState.RUNNING
                 self._notify_status_update()
+                self._start_process_monitor()
 
                 return {
                     "status": "SUCCESS",
@@ -188,6 +248,7 @@ class EmulatorManager:
 
             except EmulatorError as e:
                 self._state = EmulatorState.ERROR
+                self._stop_process_monitor()
                 self._notify_error(e)
                 return {
                     "status": "ERROR",
@@ -196,6 +257,7 @@ class EmulatorManager:
                 }
             except Exception as e:
                 logger.error(f"Unexpected error in launch_program: {e}")
+                self._stop_process_monitor()
                 self._state = EmulatorState.ERROR
                 error = EmulatorError("SYSTEM_ERROR", str(e))
                 self._notify_error(error)
@@ -209,6 +271,8 @@ class EmulatorManager:
         """Stop the currently running program"""
         with self._lock:
             try:
+                self._stop_process_monitor()
+
                 if self._state not in (EmulatorState.RUNNING, EmulatorState.ERROR):
                     raise EmulatorError(
                         "INVALID_STATE",
@@ -220,28 +284,14 @@ class EmulatorManager:
 
                 if self._process and self._process.is_running():
                     try:
-                        # Try to stop the entire process group
-                        pgid = os.getpgid(self._process.pid)
-                        if force:
-                            os.killpg(pgid, signal.SIGKILL)
-                        else:
-                            os.killpg(pgid, signal.SIGTERM)
+                        ProcessManager.terminate_process(self._process, force)
 
-                        # Wait for process to end
-                        try:
-                            self._process.wait(timeout=5)
-                        except psutil.TimeoutExpired:
-                            if not force:
-                                # If normal termination failed, force kill
-                                os.killpg(pgid, signal.SIGKILL)
-                                self._process.wait(timeout=5)
-
-                    except ProcessLookupError:
-                        # Process already ended
-                        pass
-                    except psutil.NoSuchProcess:
-                        # Process already ended
-                        pass
+                    except Exception as e:
+                        logger.error(f"Error terminating process: {e}")
+                        raise EmulatorError(
+                            "STOP_ERROR",
+                            f"Failed to stop emulator: {str(e)}"
+                        )
 
                 self._cleanup()
                 return {
@@ -251,6 +301,7 @@ class EmulatorManager:
 
             except EmulatorError as e:
                 self._state = EmulatorState.ERROR
+                self._stop_process_monitor()
                 self._notify_error(e)
                 return {
                     "status": "ERROR",
@@ -259,6 +310,7 @@ class EmulatorManager:
                 }
             except Exception as e:
                 logger.error(f"Unexpected error in stop_program: {e}")
+                self._stop_process_monitor()
                 self._state = EmulatorState.ERROR
                 error = EmulatorError("SYSTEM_ERROR", str(e))
                 self._notify_error(error)
@@ -268,15 +320,20 @@ class EmulatorManager:
                     "code": "SYSTEM_ERROR"
                 }
 
-    def _cleanup(self):
-        """Clean up after program termination"""
-        self._state = EmulatorState.IDLE
+    def _cleanup(self, error_state: bool = False):
+        """
+        Clean up after program termination
+        Args:
+            error_state: If True, maintain ERROR state instead of going to IDLE
+        """
         self._current_demo = None
         self._start_time = None
         self._process = None
         self._launch_id = None
         self._current_config = None
-        self._notify_status_update()
+        if not error_state:
+            self._state = EmulatorState.IDLE
+            self._notify_status_update()
 
     def _check_cache_size(self) -> None:
         """Check cache size and clean up if necessary"""
@@ -395,3 +452,7 @@ class EmulatorManager:
 
 # Create singleton instance
 emulator = EmulatorManager()
+
+print(emulator.binary_mapper.get_path("x64sc"))
+print(emulator.binary_mapper.get_path("x64"))
+print(emulator.binary_mapper.get_path("amiberry"))
