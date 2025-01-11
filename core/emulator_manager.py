@@ -37,7 +37,7 @@ class EmulatorManager:
         self._should_monitor = False
         self.binary_mapper = BinaryMapper(Config)
         self.disk_cache = DiskImageCache(Config)
-        self._command_handler = CommandHandler()
+        self._command_handler = CommandHandler(Config)
 
         # Ensure cache directory exists
         Path(Config.CACHE_DIR).mkdir(parents=True, exist_ok=True)
