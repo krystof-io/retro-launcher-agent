@@ -5,5 +5,4 @@ psutil==5.9.8
 simple-websocket==1.0.0  # Required by flask-sock
 boto3==1.35.95
 requests==2.32.3
-telnetlib3==2.0.4
-aiohttp==3.10.11
+telnetlib-313-and-up==3.13.1
