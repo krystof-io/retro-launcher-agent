@@ -25,3 +25,5 @@ class Config:
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
     AWS_ENDPOINT_URL = os.getenv('AWS_ENDPOINT_URL','https://minio.krystof.io:8443')
     AWS_BUCKET_NAME = os.getenv('AWS_BUCKET_NAME','retro-storage-dev')
+
+    KEYBOARD_BANGER_URL = os.getenv('KEYBOARD_BANGER_URL', 'http://esp32-wifikeyboard.lan/keybang')

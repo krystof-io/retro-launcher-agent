@@ -115,12 +115,28 @@ Content-Type: application/json
 POST http://192.168.50.134:5000/program/launch
 Content-Type: application/json
 
+
 {
   "authors": [
     "Booze Design"
   ],
   "binary": "x64",
   "commandLineArgs": "-autostart",
+  "command_list": [
+    {
+      "after_time_in_seconds": 5,
+      "command": "press_keys",
+      "keys": " "
+    },
+    {
+      "after_time_in_seconds": 5,
+      "command": "mount_next"
+    },
+    {
+      "after_time_in_seconds": 5,
+      "command": "finish"
+    }
+  ],
   "images": [
     {
       "diskNumber": 1,
