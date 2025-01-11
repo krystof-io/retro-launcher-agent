@@ -245,7 +245,7 @@ class EmulatorManager:
                 # Start a new thread to handle commands
                 command_thread = threading.Thread(
                     target=self._command_handler.handle_commands,
-                    args=(config["command_list"], config["images"], 0, self.stop_program, process)
+                    args=(config["command_list"], config["images"],image_paths, 0, self.stop_program, process)
                 )
                 command_thread.start()
 

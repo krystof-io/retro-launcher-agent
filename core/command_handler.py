@@ -12,7 +12,7 @@ class CommandHandler:
     def __init__(self, config_module):
         self.config = config_module
 
-    def handle_commands(self, commands, images, current_image_index, stopCallback, process):
+    def handle_commands(self, commands, images, image_paths, current_image_index, stopCallback, process):
         """Dop the things
         :param process: child process (emulator)
         """
@@ -34,7 +34,7 @@ class CommandHandler:
                 current_image_index += 1
                 if current_image_index >= len(images):
                     current_image_index = 0
-                nextImagePath = str(Path(images[current_image_index]).resolve())
+                nextImagePath = str(Path(image_paths[current_image_index]).resolve())
                 attach_vice_image(nextImagePath);
             elif (commandString == "press_keys"):
                 keys = command["keys"]
