@@ -249,7 +249,6 @@ class EmulatorManager:
                 )
                 command_thread.start()
 
-
                 return {
                     "status": "SUCCESS",
                     "message": "Program launched successfully",
@@ -281,6 +280,7 @@ class EmulatorManager:
         """Stop the currently running program"""
         with self._lock:
             try:
+                logger.info(f"Stopping program with force={force}")
                 self._stop_process_monitor()
 
                 if self._state not in (EmulatorState.RUNNING, EmulatorState.ERROR):

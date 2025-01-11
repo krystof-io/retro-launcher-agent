@@ -41,6 +41,8 @@ class CommandHandler:
                 logger.info("Pressing keys: %s", keys)
                 requests.post(self.config.KEYBOARD_BANGER_URL,data=keys)
 
+        logger.info("Done with commands for this program!")
+
 
 def attach_vice_image(full_image_file_path, timeout=1):
     logger.info("Connecting to vice to mount image: %s", full_image_file_path)
