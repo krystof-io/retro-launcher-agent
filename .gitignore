@@ -77,3 +77,4 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 /retro-launcher-agent-bundle-output.txt
 /.env
+/image-cache/

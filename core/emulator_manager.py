@@ -17,6 +17,7 @@ from config import Config
 from .binary_mapping import BinaryMapper
 from .disk_image_cache import DiskImageCache
 from .process_manager import ProcessManager
+from .command_handler import CommandHandler
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class EmulatorManager:
         self._should_monitor = False
         self.binary_mapper = BinaryMapper(Config)
         self.disk_cache = DiskImageCache(Config)
+        self._command_handler = CommandHandler()
 
         # Ensure cache directory exists
         Path(Config.CACHE_DIR).mkdir(parents=True, exist_ok=True)
@@ -74,7 +76,7 @@ class EmulatorManager:
                                 "state": self._state.name
                             }
                         ))
-                        self._cleanup(true)
+                        self._cleanup(True)
                     break
             except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
                 logger.error(f"Error monitoring process: {e}")
@@ -84,7 +86,7 @@ class EmulatorManager:
                         "MONITORING_ERROR",
                         f"Failed to monitor emulator process: {str(e)}"
                     ))
-                    self._cleanup(true)
+                    self._cleanup(True)
                 break
             time.sleep(1)  #
 
@@ -239,6 +241,14 @@ class EmulatorManager:
                 self._state = EmulatorState.RUNNING
                 self._notify_status_update()
                 self._start_process_monitor()
+
+                # Start a new thread to handle commands
+                command_thread = threading.Thread(
+                    target=self._command_handler.handle_commands,
+                    args=(config["command_list"], config["images"], 0, self.stop_program, process)
+                )
+                command_thread.start()
+
 
                 return {
                     "status": "SUCCESS",
