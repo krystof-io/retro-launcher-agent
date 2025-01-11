@@ -42,7 +42,7 @@ class CommandHandler:
                 requests.post(self.config.KEYBOARD_BANGER_URL,data=keys)
 
 
-def attach_vice_image(full_image_file_path, timeout=10):
+def attach_vice_image(full_image_file_path, timeout=1):
     logger.info("Connecting to vice to mount image: %s", full_image_file_path)
     try:
         # Create and connect in one step

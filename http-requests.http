@@ -124,16 +124,15 @@ Content-Type: application/json
   "commandLineArgs": "-autostart",
   "command_list": [
     {
-      "after_time_in_seconds": 25,
+      "after_time_in_seconds": 45,
       "command": "mount_next"
     },
     {
-      "after_time_in_seconds": 5,
-      "command": "press_keys",
-      "keys": " "
+      "after_time_in_seconds": 567,
+      "command": "mount_next"
     },
     {
-      "after_time_in_seconds": 30,
+      "after_time_in_seconds": 323,
       "command": "finish"
     }
   ],
