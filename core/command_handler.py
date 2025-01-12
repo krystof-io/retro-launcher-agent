@@ -4,6 +4,8 @@ import time
 import requests
 from telnetlib import Telnet
 from pathlib import Path
+import threading
+from .process_manager import ProcessManager
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ class CommandHandler:
     def __init__(self, config_module):
         self.config = config_module
 
-    def handle_commands(self, commands, images, image_paths, current_image_index, stopCallback, process):
+    def handle_commands(self, commands, images, image_paths, current_image_index, stopCallback, processManager):
         """Dop the things
         :param process: child process (emulator)
         """
@@ -23,8 +25,8 @@ class CommandHandler:
             logger.info("Delay for %s, then execute command %s", command["after_time_in_seconds"], command["command"])
             for i in range(command["after_time_in_seconds"]):
                 time.sleep(1)
-                if process.poll() is not None:
-                    return;
+                if not processManager.is_running:
+                    return
             commandString = command["command"]
             logger.info("Process command: %s", command)
             if (commandString == "finish"):

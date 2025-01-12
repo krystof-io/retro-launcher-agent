@@ -1,9 +1,9 @@
 from flask import jsonify, request
-from core.emulator_manager import emulator
+from core.emulator_manager import EmulatorManager
 from core.errors import EmulatorError
 import time
 
-def register_routes(app):
+def register_routes(app,emulator):
     @app.route('/status', methods=['GET'])
     def get_status():
         return jsonify(emulator.status_dict)

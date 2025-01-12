@@ -1,0 +1,198 @@
+# launch_manager.py
+
+import os
+import logging
+from pathlib import Path
+from typing import Dict, List, Optional
+from .errors import EmulatorError
+from .binary_mapper import BinaryMapper
+
+
+logger = logging.getLogger(__name__)
+
+
+class LaunchManager:
+    """Handles program launch configuration, validation, and command building"""
+
+    def __init__(self, config, binary_mapper: BinaryMapper):
+        self.config = config
+        self.binary_mapper = binary_mapper
+
+
+    def prepare_launch(self, config: Dict, image_paths: List[str]) -> Dict:
+        """Prepare a program launch with complete validation"""
+        try:
+            # Validate the configuration
+            self.validate_config(config)
+
+            # Build launch command
+            command = self.build_launch_command(config, image_paths)
+
+            # Prepare command sequence if provided
+            command_sequence = None
+            if "command_list" in config:
+                command_sequence = self._prepare_command_sequence(config)
+
+            return {
+                "command": command,
+                "command_sequence": command_sequence,
+                "binary": config["binary"],
+                "program_title": config["programTitle"]
+            }
+
+        except Exception as e:
+            logger.error(f"Launch preparation failed: {e}")
+            raise EmulatorError(
+                "LAUNCH_PREPARATION_FAILED",
+                f"Failed to prepare launch: {str(e)}"
+            )
+
+    def validate_config(self, config: Dict) -> None:
+        """Validate program launch configuration"""
+        # Check required fields
+        required_fields = [
+            "binary",
+            "commandLineArgs",
+            "images",
+            "platformName",
+            "programTitle",
+            "programType",
+            "authors"
+        ]
+
+        missing_fields = [field for field in required_fields if field not in config]
+        if missing_fields:
+            raise EmulatorError(
+                "INVALID_CONFIG",
+                f"Missing required fields: {', '.join(missing_fields)}"
+            )
+
+        # Validate binary existence and path
+        binary_path = self.binary_mapper.get_path(config["binary"])
+        if not binary_path or not os.path.exists(binary_path):
+            raise EmulatorError(
+                "BINARY_NOT_FOUND",
+                f"Emulator binary not found: {config['binary']} at {binary_path}"
+            )
+
+        # Validate disk images configuration
+        if not config["images"]:
+            raise EmulatorError(
+                "INVALID_CONFIG",
+                "At least one disk image is required"
+            )
+
+        for image in config["images"]:
+            self._validate_image_config(image)
+
+        # Validate command list if present
+        if "command_list" in config:
+            self._validate_command_list(config["command_list"])
+
+    def _validate_image_config(self, image: Dict) -> None:
+        """Validate a single disk image configuration"""
+        required_fields = ["diskNumber", "fileHash", "storagePath", "size"]
+        missing_fields = [field for field in required_fields if field not in image]
+
+        if missing_fields:
+            raise EmulatorError(
+                "INVALID_CONFIG",
+                f"Missing image fields: {', '.join(missing_fields)}"
+            )
+
+        # Additional image validations
+        if image["diskNumber"] < 1:
+            raise EmulatorError(
+                "INVALID_CONFIG",
+                "Disk number must be greater than 0"
+            )
+
+        if image["size"] <= 0:
+            raise EmulatorError(
+                "INVALID_CONFIG",
+                "Image size must be greater than 0"
+            )
+
+    def _validate_command_list(self, commands: List[Dict]) -> None:
+        """Validate command sequence configuration"""
+        for idx, cmd in enumerate(commands):
+            if "command" not in cmd:
+                raise EmulatorError(
+                    "INVALID_CONFIG",
+                    f"Missing 'command' in command sequence at position {idx}"
+                )
+
+            if "after_time_in_seconds" not in cmd:
+                raise EmulatorError(
+                    "INVALID_CONFIG",
+                    f"Missing 'after_time_in_seconds' in command at position {idx}"
+                )
+
+            if cmd["after_time_in_seconds"] < 0:
+                raise EmulatorError(
+                    "INVALID_CONFIG",
+                    f"Invalid timing in command at position {idx}"
+                )
+
+    def build_launch_command(self, config: Dict, image_paths: List[str]) -> List[str]:
+        """Build the emulator launch command"""
+        binary_path = self.binary_mapper.get_path(config["binary"])
+        if not binary_path:
+            raise EmulatorError(
+                "BINARY_NOT_FOUND",
+                f"Binary path not found for {config['binary']}"
+            )
+
+        command = [binary_path]
+
+        # Add configured arguments
+        if config["commandLineArgs"]:
+            args = config["commandLineArgs"].split()
+            command.extend(args)
+
+        # Add first image path for boot
+        if image_paths:
+            first_image_path = str(Path(image_paths[0]).resolve())
+            logger.debug(f"Using boot image: {first_image_path}")
+            command.append(first_image_path)
+
+        logger.info(f"Built launch command: {' '.join(command)}")
+        return command
+
+    def _prepare_command_sequence(self, config: Dict) -> List[Dict]:
+        """Prepare command sequence for execution"""
+        if not config.get("command_list"):
+            return []
+
+        # Clone and validate command sequence
+        sequence = []
+        current_time = 0
+
+        for cmd in config["command_list"]:
+            # Convert relative times to absolute
+            command_time = current_time + cmd["after_time_in_seconds"]
+            sequence.append({
+                "time": command_time,
+                "command": cmd["command"],
+                "params": {k: v for k, v in cmd.items()
+                           if k not in ["command", "after_time_in_seconds"]}
+            })
+            current_time = command_time
+
+        return sorted(sequence, key=lambda x: x["time"])
+
+    def get_binary_info(self, binary_name: str) -> Dict:
+        """Get information about a binary"""
+        binary_path = self.binary_mapper.get_path(binary_name)
+        if not binary_path:
+            raise EmulatorError(
+                "BINARY_NOT_FOUND",
+                f"Binary information not found for {binary_name}"
+            )
+
+        return {
+            "name": binary_name,
+            "path": binary_path,
+            "exists": os.path.exists(binary_path),
+            "size": os.path.getsize(binary_path) if os.path.exists(binary_path) else None
+        }

@@ -1,6 +1,6 @@
 import logging
 import traceback
-from core.emulator_manager import emulator
+from core.emulator_manager import EmulatorManager
 
 logger = logging.getLogger(__name__)
 
