@@ -61,39 +61,41 @@ Content-Type: application/json
     "Booze Design"
   ],
   "binary": "x64",
-  "commandLineArgs": "-autostart",
+  "command_line_args": "-autostart",
   "command_list": [
 
     {
-      "after_time_in_seconds": 15,
-      "command": "finish"
+      "delay_seconds": 15,
+      "command": "FINISH"
     }
   ],
   "images": [
     {
-      "diskNumber": 1,
-      "fileHash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
+      "disk_number": 1,
+      "file_hash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
       "size": 174848,
-      "storagePath": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
+      "storage_path": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
     },
     {
-      "diskNumber": 2,
-      "fileHash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
+      "disk_number": 2,
+      "file_hash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
       "size": 174848,
-      "storagePath": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
+      "storage_path": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
     },
     {
-      "diskNumber": 3,
-      "fileHash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
+      "disk_number": 3,
+      "file_hash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
       "size": 174848,
-      "storagePath": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
+      "storage_path": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
     }
   ],
-  "platformName": "Commodore 64",
-  "programTitle": "Edge of Disgrace",
+  "platform_name": "Commodore 64",
+  "program_title": "Edge of Disgrace",
   "programType": "DEMO"
 }
 
+### Get emulator status
+GET http://192.168.50.134:5000/status
 
 ### stop test pi
 POST http://192.168.50.134:5000/program/stop
@@ -113,42 +115,42 @@ Content-Type: application/json
     "Booze Design"
   ],
   "binary": "x64",
-  "commandLineArgs": "-autostart",
+  "command_line_args": "-autostart",
   "command_list": [
     {
-      "after_time_in_seconds": 45,
-      "command": "mount_next"
+      "delay_seconds": 45,
+      "command": "MOUNT_NEXT"
     },
     {
-      "after_time_in_seconds": 567,
-      "command": "mount_next"
+      "delay_seconds": 567,
+      "command": "MOUNT_NEXT"
     },
     {
-      "after_time_in_seconds": 323,
-      "command": "finish"
+      "delay_seconds": 323,
+      "command": "FINISH"
     }
   ],
   "images": [
     {
-      "diskNumber": 1,
-      "fileHash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
+      "disk_number": 1,
+      "file_hash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
       "size": 174848,
-      "storagePath": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
+      "storage_path": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
     },
     {
-      "diskNumber": 2,
-      "fileHash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
+      "disk_number": 2,
+      "file_hash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
       "size": 174848,
-      "storagePath": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
+      "storage_path": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
     },
     {
-      "diskNumber": 3,
-      "fileHash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
+      "disk_number": 3,
+      "file_hash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
       "size": 174848,
-      "storagePath": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
+      "storage_path": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
     }
   ],
-  "platformName": "Commodore 64",
-  "programTitle": "Edge of Disgrace",
+  "platform_name": "Commodore 64",
+  "program_title": "Edge of Disgrace",
   "programType": "DEMO"
 }

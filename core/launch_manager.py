@@ -37,7 +37,7 @@ class LaunchManager:
                 "command": command,
                 "command_sequence": command_sequence,
                 "binary": config["binary"],
-                "program_title": config["programTitle"]
+                "program_title": config["program_title"]
             }
 
         except Exception as e:
@@ -52,10 +52,10 @@ class LaunchManager:
         # Check required fields
         required_fields = [
             "binary",
-            "commandLineArgs",
+            "command_line_args",
             "images",
-            "platformName",
-            "programTitle",
+            "platform_name",
+            "program_title",
             "programType",
             "authors"
         ]
@@ -91,7 +91,7 @@ class LaunchManager:
 
     def _validate_image_config(self, image: Dict) -> None:
         """Validate a single disk image configuration"""
-        required_fields = ["diskNumber", "fileHash", "storagePath", "size"]
+        required_fields = ["disk_number", "file_hash", "storage_path", "size"]
         missing_fields = [field for field in required_fields if field not in image]
 
         if missing_fields:
@@ -101,7 +101,7 @@ class LaunchManager:
             )
 
         # Additional image validations
-        if image["diskNumber"] < 1:
+        if image["disk_number"] < 1:
             raise EmulatorError(
                 "INVALID_CONFIG",
                 "Disk number must be greater than 0"
@@ -116,19 +116,19 @@ class LaunchManager:
     def _validate_command_list(self, commands: List[Dict]) -> None:
         """Validate command sequence configuration"""
         for idx, cmd in enumerate(commands):
-            if "command" not in cmd:
+            if "command_type" not in cmd:
                 raise EmulatorError(
                     "INVALID_CONFIG",
-                    f"Missing 'command' in command sequence at position {idx}"
+                    f"Missing 'command_type' in command sequence at position {idx}"
                 )
 
-            if "after_time_in_seconds" not in cmd:
+            if "delay_seconds" not in cmd:
                 raise EmulatorError(
                     "INVALID_CONFIG",
-                    f"Missing 'after_time_in_seconds' in command at position {idx}"
+                    f"Missing 'delay_seconds' in command at position {idx}"
                 )
 
-            if cmd["after_time_in_seconds"] < 0:
+            if cmd["delay_seconds"] < 0:
                 raise EmulatorError(
                     "INVALID_CONFIG",
                     f"Invalid timing in command at position {idx}"
@@ -146,8 +146,8 @@ class LaunchManager:
         command = [binary_path]
 
         # Add configured arguments
-        if config["commandLineArgs"]:
-            args = config["commandLineArgs"].split()
+        if config["command_line_args"]:
+            args = config["command_line_args"].split()
             command.extend(args)
 
         # Add first image path for boot
@@ -170,12 +170,12 @@ class LaunchManager:
 
         for cmd in config["command_list"]:
             # Convert relative times to absolute
-            command_time = current_time + cmd["after_time_in_seconds"]
+            command_time = current_time + cmd["delay_seconds"]
             sequence.append({
                 "time": command_time,
                 "command": cmd["command"],
                 "params": {k: v for k, v in cmd.items()
-                           if k not in ["command", "after_time_in_seconds"]}
+                           if k not in ["command", "delay_seconds"]}
             })
             current_time = command_time
 

@@ -42,13 +42,13 @@ class CacheManager:
         with self._lock:
             try:
                 # Sort images by disk number
-                sorted_images = sorted(images, key=lambda x: x["diskNumber"])
+                sorted_images = sorted(images, key=lambda x: x["disk_number"])
                 image_paths = []
 
                 for image in sorted_images:
                     cached_path = self.get_disk_image(
-                        storage_path=image["storagePath"],
-                        file_hash=image["fileHash"],
+                        storage_path=image["storage_path"],
+                        file_hash=image["file_hash"],
                         expected_size=image["size"]
                     )
                     image_paths.append(str(cached_path))

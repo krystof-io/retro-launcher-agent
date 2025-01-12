@@ -22,23 +22,25 @@ class CommandHandler:
         print("Images: ", images)
 
         for command in commands:
-            logger.info("Delay for %s, then execute command %s", command["after_time_in_seconds"], command["command"])
-            for i in range(command["after_time_in_seconds"]):
+            logger.info("Delay for %s, then execute command %s", command["delay_seconds"], command["command"])
+            for i in range(command["delay_seconds"]):
                 time.sleep(1)
                 if not processManager.is_running:
                     return
-            commandString = command["command"]
+            commandString = command["command_type"]
             logger.info("Process command: %s", command)
-            if (commandString == "finish"):
+            if (commandString == "FINISH"):
                 stopCallback()
                 return
-            elif (commandString == "mount_next"):
+            elif (commandString == "MOUNT_NEXT"):
                 current_image_index += 1
                 if current_image_index >= len(images):
                     current_image_index = 0
                 nextImagePath = str(Path(image_paths[current_image_index]).resolve())
                 attach_vice_image(nextImagePath);
-            elif (commandString == "press_keys"):
+            elif (commandString == "PRESS_KEYS"):
+                logger.info("Pressing keys1: %s", command["command_data"])
+                logger.info("Pressing keys: %s", command["keys"])
                 keys = command["keys"]
                 logger.info("Pressing keys: %s", keys)
                 requests.post(self.config.KEYBOARD_BANGER_URL,data=keys)
