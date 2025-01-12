@@ -65,7 +65,7 @@ Content-Type: application/json
   "playback_timeline_events": [
     {
       "time_offset_seconds": 15,
-      "command_type": "FINISH"
+      "event_type": "FINISH"
     }
   ],
   "images": [
@@ -139,6 +139,14 @@ Content-Type: application/json
       'event_data': None
     },
     {
+      'sequence_number': 4,
+      'event_type': 'PRESS_KEYS',
+      'time_offset_seconds': 323,
+      'event_data': {
+        'keys': '<F1>'
+      }
+    },
+    {
       'sequence_number': 2,
       'event_type': 'MOUNT_NEXT_DISK',
       'time_offset_seconds': 567,
@@ -150,14 +158,7 @@ Content-Type: application/json
       'time_offset_seconds': 323,
       'event_data': None
     },
-    {
-      'sequence_number': 4,
-      'event_type': 'PRESS_KEYS',
-      'time_offset_seconds': 323,
-      'event_data': {
-        'keys': '<F1>'
-      }
-    }
+
   ],
   'binary': 'x64',
   'platform_name': 'Commodore 64',

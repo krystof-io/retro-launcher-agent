@@ -174,9 +174,9 @@ class LaunchManager:
             command_time = current_time + cmd["time_offset_seconds"]
             sequence.append({
                 "time": command_time,
-                "command": cmd["command_type"],
+                "command": cmd["event_type"],
                 "params": {k: v for k, v in cmd.items()
-                           if k not in ["command_type", "time_offset_seconds"]}
+                           if k not in ["event_type", "time_offset_seconds"]}
             })
             current_time = command_time
 
