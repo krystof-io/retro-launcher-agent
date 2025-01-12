@@ -109,61 +109,58 @@ POST http://192.168.50.134:5000/program/launch
 Content-Type: application/json
 
 {
-  'program_type': 'DEMO',
-  'command_line_args': '-sid 8580 -drive 8,9 assssss',
-  'images': [
+  "program_type": "DEMO",
+  "command_line_args": "-autostart",
+  "images": [
     {
-      'disk_number': 1,
-      'file_hash': 'ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61',
-      'size': 174848,
-      'storage_path': 'commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64'
+      "disk_number": 1,
+      "file_hash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
+      "size": 174848,
+      "storage_path": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
     },
     {
-      'disk_number': 2,
-      'file_hash': '0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956',
-      'size': 174848,
-      'storage_path': 'commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64'
+      "disk_number": 2,
+      "file_hash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
+      "size": 174848,
+      "storage_path": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
     },
     {
-      'disk_number': 3,
-      'file_hash': 'b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628',
-      'size': 174848,
-      'storage_path': 'commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64'
+      "disk_number": 3,
+      "file_hash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
+      "size": 174848,
+      "storage_path": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
     }
   ],
-  'playback_timeline_events': [
+  "playback_timeline_events": [
     {
-      'sequence_number': 1,
-      'event_type': 'MOUNT_NEXT_DISK',
-      'time_offset_seconds': 45,
-      'event_data': None
+      "sequence_number": 1,
+      "event_type": "MOUNT_NEXT_DISK",
+      "time_offset_seconds": 45
     },
     {
-      'sequence_number': 4,
-      'event_type': 'PRESS_KEYS',
-      'time_offset_seconds': 323,
-      'event_data': {
-        'keys': '<F1>'
+      "sequence_number": 4,
+      "event_type": "PRESS_KEYS",
+      "time_offset_seconds": 1,
+      "event_data": {
+        "keys": "<F1>"
       }
     },
     {
-      'sequence_number': 2,
-      'event_type': 'MOUNT_NEXT_DISK',
-      'time_offset_seconds': 567,
-      'event_data': None
+      "sequence_number": 2,
+      "event_type": "MOUNT_NEXT_DISK",
+      "time_offset_seconds": 567
     },
     {
-      'sequence_number': 3,
-      'event_type': 'END_PLAYBACK',
-      'time_offset_seconds': 323,
-      'event_data': None
-    },
+      "sequence_number": 3,
+      "event_type": "END_PLAYBACK",
+      "time_offset_seconds": 323
+    }
 
   ],
-  'binary': 'x64',
-  'platform_name': 'Commodore 64',
-  'program_title': 'Edge of Disgrace',
-  'authors': [
-    'Booze Design'
+  "binary": "x64",
+  "platform_name": "Commodore 64",
+  "program_title": "Edge of Disgrace",
+  "authors": [
+    "Booze Design"
   ]
 }

@@ -38,13 +38,11 @@ class PlaybackTimelineHandler:
                 nextImagePath = str(Path(image_paths[current_image_index]).resolve())
                 attach_vice_image(nextImagePath);
             elif (eventType == "PRESS_KEYS"):
-                logger.info("Pressing keys1: %s", event["event_data"]["keys"])
-                logger.info("Pressing keys: %s", event["keys"])
+                logger.info("Pressing keys: %s", event["event_data"]["keys"])
                 keys = event["event_data"]["keys"]
-                logger.info("Pressing keys: %s", keys)
                 requests.post(self.config.KEYBOARD_BANGER_URL,data=keys)
 
-        logger.info("Done with commands for this program!")
+        logger.info("Done with playback timeline events for this program!")
 
 
 def attach_vice_image(full_image_file_path, timeout=1):
