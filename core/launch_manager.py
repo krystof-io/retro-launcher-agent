@@ -117,19 +117,19 @@ class LaunchManager:
     def _validate_playback_timeline_events(self, commands: List[Dict]) -> None:
         """Validate command sequence configuration"""
         for idx, cmd in enumerate(commands):
-            if "command_type" not in cmd:
+            if "event_type" not in cmd:
                 raise EmulatorError(
                     "INVALID_CONFIG",
-                    f"Missing 'command_type' in command sequence at position {idx}"
+                    f"Missing 'event_type' in command sequence at position {idx}"
                 )
 
-            if "delay_seconds" not in cmd:
+            if "time_offset_seconds" not in cmd:
                 raise EmulatorError(
                     "INVALID_CONFIG",
-                    f"Missing 'delay_seconds' in command at position {idx}"
+                    f"Missing 'time_offset_seconds' in command at position {idx}"
                 )
 
-            if cmd["delay_seconds"] < 0:
+            if cmd["time_offset_seconds"] < 0:
                 raise EmulatorError(
                     "INVALID_CONFIG",
                     f"Invalid timing in command at position {idx}"
