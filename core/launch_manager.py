@@ -171,12 +171,12 @@ class LaunchManager:
 
         for cmd in config["playback_timeline_events"]:
             # Convert relative times to absolute
-            command_time = current_time + cmd["delay_seconds"]
+            command_time = current_time + cmd["time_offset_seconds"]
             sequence.append({
                 "time": command_time,
                 "command": cmd["command_type"],
                 "params": {k: v for k, v in cmd.items()
-                           if k not in ["command_type", "delay_seconds"]}
+                           if k not in ["command_type", "time_offset_seconds"]}
             })
             current_time = command_time
 
