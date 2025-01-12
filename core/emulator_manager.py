@@ -10,7 +10,7 @@ from .cache_manager import CacheManager
 from .binary_mapper import BinaryMapper
 from .errors import EmulatorError
 from .states import EmulatorState
-from .command_handler import CommandHandler
+from .playback_timeline_handler import PlaybackTimelineHandler
 import threading
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ class EmulatorManager:
         self.binary_mapper = BinaryMapper(self.config)
         self.launch_manager = LaunchManager(self.config, self.binary_mapper)
         self.cache_manager = CacheManager(self.config)
-        self.command_handler = CommandHandler(self.config)
+        self.playback_timeline_handler = PlaybackTimelineHandler(self.config)
 
     def launch_program(self, config: Dict) -> Dict:
         """Launch a program with the specified configuration"""
@@ -76,11 +76,11 @@ class EmulatorManager:
             self._notify_status_update()
 
             # Start a new thread to handle commands
-            command_thread = threading.Thread(
-                target=self.command_handler.handle_commands,
-                args=(config["command_list"], config["images"], image_paths, 0, self.stop_program, self.process_manager)
+            playback_timeline_handler_thread = threading.Thread(
+                target=self.playback_timeline_handler.handle_playback,
+                args=(config["playback_timeline_events"], config["images"], image_paths, 0, self.stop_program, self.process_manager)
             )
-            command_thread.start()
+            playback_timeline_handler_thread.start()
 
             return {
                 "status": "SUCCESS",

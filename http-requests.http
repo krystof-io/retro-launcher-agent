@@ -6,7 +6,7 @@ POST http://localhost:5000/dev/mode
 Content-Type: application/json
 
 {
-    "mode": "REAL"
+  "mode": "REAL"
 }
 
 ### endpoint for emulator state changes
@@ -14,7 +14,7 @@ POST http://localhost:5000/dev/mode
 Content-Type: application/json
 
 {
-    "mode": "SIMULATED"
+  "mode": "SIMULATED"
 }
 
 ### endpoint for emulator state changes
@@ -22,8 +22,8 @@ POST http://localhost:5000/dev/state
 Content-Type: application/json
 
 {
-    "running": true,
-    "demo": "asdf"
+  "running": true,
+  "demo": "asdf"
 }
 
 ### endpoint for emulator state changes
@@ -31,8 +31,8 @@ POST http://localhost:5000/dev/state
 Content-Type: application/json
 
 {
-    "running": false,
-    "demo": "asdf"
+  "running": false,
+  "demo": "asdf"
 }
 
 ### endpoint for emulator error simulation
@@ -40,8 +40,8 @@ POST http://localhost:5000/dev/error
 Content-Type: application/json
 
 {
-    "code": "EMULATOR_CRASHED",
-    "message": "Pooooop!"
+  "code": "EMULATOR_CRASHED",
+  "message": "Pooooop!"
 }
 
 ### stop test
@@ -49,7 +49,7 @@ POST http://localhost:5000/program/stop
 Content-Type: application/json
 
 {
-    "force": true
+  "force": true
 }
 
 ### launch test
@@ -62,11 +62,10 @@ Content-Type: application/json
   ],
   "binary": "x64",
   "command_line_args": "-autostart",
-  "command_list": [
-
+  "playback_timeline_events": [
     {
       "delay_seconds": 15,
-      "command": "FINISH"
+      "command_type": "FINISH"
     }
   ],
   "images": [
@@ -102,55 +101,68 @@ POST http://192.168.50.134:5000/program/stop
 Content-Type: application/json
 
 {
-    "force": false
+  "force": false
 }
 
 ### launch test on pi
 POST http://192.168.50.134:5000/program/launch
 Content-Type: application/json
 
-
 {
-  "authors": [
-    "Booze Design"
-  ],
-  "binary": "x64",
-  "command_line_args": "-autostart",
-  "command_list": [
+  'program_type': 'DEMO',
+  'command_line_args': '-sid 8580 -drive 8,9 assssss',
+  'images': [
     {
-      "delay_seconds": 45,
-      "command": "MOUNT_NEXT"
+      'disk_number': 1,
+      'file_hash': 'ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61',
+      'size': 174848,
+      'storage_path': 'commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64'
     },
     {
-      "delay_seconds": 567,
-      "command": "MOUNT_NEXT"
+      'disk_number': 2,
+      'file_hash': '0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956',
+      'size': 174848,
+      'storage_path': 'commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64'
     },
     {
-      "delay_seconds": 323,
-      "command": "FINISH"
+      'disk_number': 3,
+      'file_hash': 'b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628',
+      'size': 174848,
+      'storage_path': 'commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64'
     }
   ],
-  "images": [
+  'playback_timeline_events': [
     {
-      "disk_number": 1,
-      "file_hash": "ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61",
-      "size": 174848,
-      "storage_path": "commodore 64/demo/ee9570df68c3ddd1fda60ea3360dd5880c2ac95ed110bbe1bd60fdb91dec3f61/EdgeOfDisgrace_0.d64"
+      'sequence_number': 1,
+      'event_type': 'MOUNT_NEXT_DISK',
+      'time_offset_seconds': 45,
+      'event_data': None
     },
     {
-      "disk_number": 2,
-      "file_hash": "0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956",
-      "size": 174848,
-      "storage_path": "commodore 64/demo/0624697997c57209929fc36ff7121ec7c61760a88576edbf0768d63e77d28956/EdgeOfDisgrace_1a.d64"
+      'sequence_number': 2,
+      'event_type': 'MOUNT_NEXT_DISK',
+      'time_offset_seconds': 567,
+      'event_data': None
     },
     {
-      "disk_number": 3,
-      "file_hash": "b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628",
-      "size": 174848,
-      "storage_path": "commodore 64/demo/b348369ba5c7644019e4bf7f3cb8a5e81529b220e10b76dc5c0b7ad548310628/EdgeOfDisgrace_1b.d64"
+      'sequence_number': 3,
+      'event_type': 'END_PLAYBACK',
+      'time_offset_seconds': 323,
+      'event_data': None
+    },
+    {
+      'sequence_number': 4,
+      'event_type': 'PRESS_KEYS',
+      'time_offset_seconds': 323,
+      'event_data': {
+        'keys': '<F1>'
+      }
     }
   ],
-  "platform_name": "Commodore 64",
-  "program_title": "Edge of Disgrace",
-  "programType": "DEMO"
+  'binary': 'x64',
+  'platform_name': 'Commodore 64',
+  'program_title': 'Edge of Disgrace',
+  'authors': [
+    'Booze Design'
+  ]
 }

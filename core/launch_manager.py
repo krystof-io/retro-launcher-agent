@@ -28,14 +28,15 @@ class LaunchManager:
             # Build launch command
             command = self.build_launch_command(config, image_paths)
 
+            
             # Prepare command sequence if provided
-            command_sequence = None
-            if "command_list" in config:
-                command_sequence = self._prepare_command_sequence(config)
-
+            playback_timeline_events = None
+            if "playback_timeline_events" in config:
+                playback_timeline_events = self._prepare_playback_timeline_events(config)
+            
             return {
                 "command": command,
-                "command_sequence": command_sequence,
+                "playback_timeline_events": playback_timeline_events,
                 "binary": config["binary"],
                 "program_title": config["program_title"]
             }
@@ -86,8 +87,8 @@ class LaunchManager:
             self._validate_image_config(image)
 
         # Validate command list if present
-        if "command_list" in config:
-            self._validate_command_list(config["command_list"])
+        if "playback_timeline_events" in config:
+            self._validate_playback_timeline_events(config["playback_timeline_events"])
 
     def _validate_image_config(self, image: Dict) -> None:
         """Validate a single disk image configuration"""
@@ -113,7 +114,7 @@ class LaunchManager:
                 "Image size must be greater than 0"
             )
 
-    def _validate_command_list(self, commands: List[Dict]) -> None:
+    def _validate_playback_timeline_events(self, commands: List[Dict]) -> None:
         """Validate command sequence configuration"""
         for idx, cmd in enumerate(commands):
             if "command_type" not in cmd:
@@ -159,23 +160,23 @@ class LaunchManager:
         logger.info(f"Built launch command: {' '.join(command)}")
         return command
 
-    def _prepare_command_sequence(self, config: Dict) -> List[Dict]:
+    def _prepare_playback_timeline_events(self, config: Dict) -> List[Dict]:
         """Prepare command sequence for execution"""
-        if not config.get("command_list"):
+        if not config.get("playback_timeline_events"):
             return []
 
         # Clone and validate command sequence
         sequence = []
         current_time = 0
 
-        for cmd in config["command_list"]:
+        for cmd in config["playback_timeline_events"]:
             # Convert relative times to absolute
             command_time = current_time + cmd["delay_seconds"]
             sequence.append({
                 "time": command_time,
-                "command": cmd["command"],
+                "command": cmd["command_type"],
                 "params": {k: v for k, v in cmd.items()
-                           if k not in ["command", "delay_seconds"]}
+                           if k not in ["command_type", "delay_seconds"]}
             })
             current_time = command_time
 
