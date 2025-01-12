@@ -57,7 +57,7 @@ class LaunchManager:
             "images",
             "platform_name",
             "program_title",
-            "programType",
+            "program_type",
             "authors"
         ]
 
