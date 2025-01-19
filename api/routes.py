@@ -18,6 +18,14 @@ def register_routes(app,emulator):
         config = request.json
         return jsonify(emulator.curate_program(config))
 
+    @app.route('/program/command', methods=['POST'])
+    def handle_command():
+        command_data = request.json
+        return jsonify(emulator.handle_command(
+            command_data.get('command'),
+            command_data.get('data')
+        ))
+
     @app.route('/program/stop', methods=['POST'])
     def stop_program():
         force = request.json.get('force', False)

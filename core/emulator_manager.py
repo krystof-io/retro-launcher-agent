@@ -11,6 +11,7 @@ from .binary_mapper import BinaryMapper
 from .errors import EmulatorError
 from .states import EmulatorState
 from .playback_timeline_handler import PlaybackTimelineHandler
+from .command_handler import CommandHandler
 import threading
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class EmulatorManager:
 
         EmulatorManager._initialized = True
         self.config = config
+        self.command_handler = None
 
         # Initialize component managers
         self.ws_manager = WebSocketManager()
@@ -42,7 +44,7 @@ class EmulatorManager:
         self.binary_mapper = BinaryMapper(self.config)
         self.launch_manager = LaunchManager(self.config, self.binary_mapper)
         self.cache_manager = CacheManager(self.config)
-        self.playback_timeline_handler = PlaybackTimelineHandler(self.config)
+        self.playback_timeline_handler = None
 
     def launch_program(self, config: Dict) -> Dict:
         """Launch a program with the specified configuration"""
@@ -64,6 +66,8 @@ class EmulatorManager:
             # Prepare disk images
             image_paths = self.cache_manager.prepare_disk_images(config["images"])
 
+            self.command_handler = CommandHandler(self.config, image_paths)
+
             # Prepare launch
             launch_config = self.launch_manager.prepare_launch(config, image_paths)
 
@@ -74,6 +78,8 @@ class EmulatorManager:
             self.state_manager.set_state(EmulatorState.RUNNING)
             self.state_manager.store_config(config)
             self._notify_status_update()
+
+            self.playback_timeline_handler = PlaybackTimelineHandler(self.config, self.command_handler)
 
             # Start a new thread to handle commands
             playback_timeline_handler_thread = threading.Thread(
@@ -115,6 +121,8 @@ class EmulatorManager:
             # Prepare disk images
             image_paths = self.cache_manager.prepare_disk_images(config["images"])
 
+            self.command_handler = CommandHandler(self.config, image_paths)
+
             # Prepare launch
             launch_config = self.launch_manager.prepare_launch(config, image_paths)
 
@@ -125,6 +133,8 @@ class EmulatorManager:
             self.state_manager.set_state(EmulatorState.RUNNING)
             self.state_manager.store_config(config)
             self._notify_status_update()
+
+            self.playback_timeline_handler = PlaybackTimelineHandler(self.config, self.command_handler)
 
             return {
                 "status": "SUCCESS",
@@ -137,6 +147,35 @@ class EmulatorManager:
         except Exception as e:
             logger.error(f"Unexpected error in launch_program: {e}")
             return self._handle_error(EmulatorError("SYSTEM_ERROR", str(e)))
+
+    def handle_command(self, command_type: str, command_data: Optional[Dict] = None) -> Dict:
+        """Handle a command during curation mode"""
+        try:
+            if not self.command_handler:
+                raise EmulatorError(
+                    "INVALID_STATE",
+                    "No active command handler - program must be running"
+                )
+
+            if command_type == "END_PLAYBACK":
+                self.stop_program(force=False)
+                return {
+                    "status": "SUCCESS",
+                    "message": "Program stopped"
+                }
+
+            # Execute command via command handler
+            self.command_handler.execute_command(command_type, command_data)
+            return {
+                "status": "SUCCESS",
+                "message": f"Command {command_type} executed successfully"
+            }
+
+        except EmulatorError as e:
+            return self._handle_error(e)
+        except Exception as e:
+            logger.error(f"Unexpected error handling command: {e}")
+            return self._handle_error(EmulatorError("COMMAND_ERROR", str(e)))
 
     def stop_program(self, force: bool = False) -> Dict:
         """Stop the currently running program"""
