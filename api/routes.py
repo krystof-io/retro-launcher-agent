@@ -13,6 +13,11 @@ def register_routes(app,emulator):
         config = request.json
         return jsonify(emulator.launch_program(config))
 
+    @app.route('/program/curate', methods=['POST'])
+    def curate_program():
+        config = request.json
+        return jsonify(emulator.curate_program(config))
+
     @app.route('/program/stop', methods=['POST'])
     def stop_program():
         force = request.json.get('force', False)

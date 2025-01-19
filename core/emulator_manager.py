@@ -78,13 +78,57 @@ class EmulatorManager:
             # Start a new thread to handle commands
             playback_timeline_handler_thread = threading.Thread(
                 target=self.playback_timeline_handler.handle_playback,
-                args=(config["playback_timeline_events"], config["images"], image_paths, 0, self.stop_program, self.process_manager)
+                args=(config["playback_timeline_events"], config["images"], image_paths, 0, self.stop_program,
+                      self.process_manager)
             )
             playback_timeline_handler_thread.start()
 
             return {
                 "status": "SUCCESS",
                 "message": "Program launched successfully",
+                "launchId": config.get("launchId")
+            }
+
+        except EmulatorError as e:
+            return self._handle_error(e)
+        except Exception as e:
+            logger.error(f"Unexpected error in launch_program: {e}")
+            return self._handle_error(EmulatorError("SYSTEM_ERROR", str(e)))
+
+    def curate_program(self, config: Dict) -> Dict:
+        """Launch a program, without any playback timeline events"""
+        try:
+            logger.info("Launching program with config:\n%s", config)
+
+            # Validate current state
+            if self.state_manager.current_state not in (EmulatorState.IDLE, EmulatorState.ERROR):
+                raise EmulatorError(
+                    "INVALID_STATE",
+                    f"Cannot launch program in current state: {self.state_manager.current_state.name}"
+                )
+
+            # Update state and notify
+            self.state_manager.set_state(EmulatorState.LAUNCHING)
+            self.ws_manager.set_launch_id(config.get("launchId"))
+            self._notify_status_update()
+
+            # Prepare disk images
+            image_paths = self.cache_manager.prepare_disk_images(config["images"])
+
+            # Prepare launch
+            launch_config = self.launch_manager.prepare_launch(config, image_paths)
+
+            # Start the process
+            self.process_manager.start_process(launch_config["command"])
+
+            # Update state and store config
+            self.state_manager.set_state(EmulatorState.RUNNING)
+            self.state_manager.store_config(config)
+            self._notify_status_update()
+
+            return {
+                "status": "SUCCESS",
+                "message": "Program launched for curation successfully",
                 "launchId": config.get("launchId")
             }
 
