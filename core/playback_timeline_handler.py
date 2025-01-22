@@ -20,7 +20,6 @@ class PlaybackTimelineHandler:
         """Execute the playback timeline"""
         logger.info(f"Handling playback timeline events: {events}")
 
-
         for event in events:
             logger.info(f"Delay for {event['time_offset_seconds']}, then execute command {event['event_type']}")
 
