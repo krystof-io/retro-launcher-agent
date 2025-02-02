@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class StateManager:
     """Manages emulator state and provides status information"""
+    VERSION = "1.0.0"  # Define version
 
     def __init__(self):
         self._lock = threading.RLock()
@@ -130,7 +131,8 @@ class StateManager:
                 "uptime": self.uptime,
                 "monitorMode": self._monitor_mode.name,
                 "state": self._state.name,
-                "systemStats": SystemMonitor.get_system_stats()
+                "systemStats": SystemMonitor.get_system_stats(),
+                "version": self.VERSION
             }
 
             # Add process stats if available
