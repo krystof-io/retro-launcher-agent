@@ -13,6 +13,7 @@ from .states import EmulatorState
 from .playback_timeline_handler import PlaybackTimelineHandler
 from .command_handler import CommandHandler
 import threading
+import subprocess
 
 logger = logging.getLogger(__name__)
 
