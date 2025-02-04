@@ -27,7 +27,10 @@ class StateManager:
 
         # Load version from properties file
         config = configparser.ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__), 'version.properties'))
+        properties_file = os.path.join(os.path.dirname(__file__), 'version.properties')
+        if not os.path.exists(properties_file):
+            raise FileNotFoundError(f"Properties file not found: {properties_file}")
+        config.read(properties_file)
         self.VERSION = config.get('DEFAULT', 'VERSION')
 
     @property
