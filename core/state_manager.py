@@ -27,7 +27,8 @@ class StateManager:
 
         # Load version from properties file
         config = configparser.ConfigParser()
-        properties_file = os.path.join(os.path.dirname(__file__), 'version.properties')
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        properties_file = os.path.join(root_dir, 'version.properties')
         if not os.path.exists(properties_file):
             raise FileNotFoundError(f"Properties file not found: {properties_file}")
         config.read(properties_file)
