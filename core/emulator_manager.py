@@ -195,6 +195,12 @@ class EmulatorManager:
             # Stop the process
             self.process_manager.stop_process(force)
 
+            # Clear audio buffer with espeak
+            try:
+                subprocess.run(['espeak', ' '], check=True)
+            except subprocess.CalledProcessError as e:
+                logger.warning(f"Failed to clear audio buffer: {e}")
+
             # Reset state and notify
             self.state_manager.set_state(EmulatorState.IDLE)
             self._notify_status_update()

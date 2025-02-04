@@ -8,14 +8,14 @@ from datetime import datetime
 from .states import EmulatorState, MonitorMode
 from .system_monitor import SystemMonitor
 from .errors import EmulatorError
+import configparser
+import os
 
 logger = logging.getLogger(__name__)
 
 
 class StateManager:
     """Manages emulator state and provides status information"""
-    VERSION = "1.0.0"  # Define version
-
     def __init__(self):
         self._lock = threading.RLock()
         self._state = EmulatorState.IDLE
@@ -24,6 +24,11 @@ class StateManager:
         self._start_time: Optional[float] = None
         self._current_config: Optional[Dict] = None
         self._simulated_running = False
+
+        # Load version from properties file
+        config = configparser.ConfigParser()
+        config.read(os.path.join(os.path.dirname(__file__), 'version.properties'))
+        self.VERSION = config.get('DEFAULT', 'VERSION')
 
     @property
     def current_state(self) -> EmulatorState:
